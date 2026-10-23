@@ -1,0 +1,3 @@
+/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles/tjurm-test2.dir
+/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles/edit_cache.dir
+/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles/rebuild_cache.dir
