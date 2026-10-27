@@ -9,27 +9,36 @@
 # RoboMaster 装甲板灯条识别
 
 读取 `videos/test.avi`，逐帧识别装甲板两侧的灯条，
-计算每根灯条的上下端点，并用绿色闭合矩形把四个端点连接起来，
-同时输出 `videos/result.avi`。
+计算每根灯条的上下端点，用绿色闭合矩形把四个端点连接起来，
+再用 PnP 解算位姿、在装甲板中心画出三维坐标轴。
+
+一次运行同时输出三个视频：
+
+| 输出文件 | 内容 |
+| --- | --- |
+| `videos/result.avi` | 只画装甲板的绿色矩形框 |
+| `videos/result_axes.avi` | 只画装甲板中心的三维坐标轴（FLU：x 红 / y 绿 / z 蓝） |
+| `videos/result_pose.avi` | 矩形框 + 坐标轴 |
 
 ## 目录结构
 
 ```
 .
 ├── CMakeLists.txt          # CMake 构建脚本
-├── main.cpp                # 读视频、逐帧调用检测、写输出视频、显示窗口
+├── main.cpp                # 读视频、逐帧检测 + 位姿解算、写三个输出视频、显示窗口
 ├── include/
 │   └── detector.h          # LightBar / Armor 结构体和函数声明
 ├── src/
 │   └── detector.cpp        # 灯条识别核心算法（二值化、轮廓、配对）
-├── pose/                   # 选做任务：PnP 位姿解算（独立可执行文件 tjurm-pose）
+├── pose/                   # 选做任务：PnP 位姿解算 + 坐标轴，由 main.cpp 调用
 │   ├── pose.h              # 相机参数、位姿结果结构体、函数声明
-│   ├── pose.cpp            # solvePnP 解算 + projectPoints 画坐标轴
-│   └── pose_main.cpp       # 读视频、逐帧解算、写 result_pose.avi
+│   └── pose.cpp            # solvePnP 解算 + projectPoints 画坐标轴
 ├── videos/
 │   ├── test.avi            # 输入视频
-│   ├── result.avi          # 灯条识别程序的输出视频
-│   └── result_pose.avi     # 位姿解算程序的输出视频
+│   ├── result.avi          # 输出：只画矩形框
+│   ├── result_axes.avi     # 输出：只画坐标轴
+│   ├── result_pose.avi     # 输出：矩形框 + 坐标轴
+│   └── pose_demo.png       # 坐标轴效果截图
 └── .vscode/
     └── c_cpp_properties.json  # 让 VS Code 认识 OpenCV 头文件，去掉红色波浪线
 ```
@@ -45,16 +54,18 @@ make -j$(nproc)
 ./tjurm-test2
 ```
 
-运行结束后，在 Windows 里双击打开：
+运行结束后，在 Windows 里双击打开（三个视频任选）：
 
 ```
 D:\AAAAAAATJU\TJU_Competition\ROBOMASTER\my-opencv-video-detector\videos\result.avi
+D:\AAAAAAATJU\TJU_Competition\ROBOMASTER\my-opencv-video-detector\videos\result_axes.avi
+D:\AAAAAAATJU\TJU_Competition\ROBOMASTER\my-opencv-video-detector\videos\result_pose.avi
 ```
 
-也可以手动指定输入输出视频：
+也可以手动指定输入视频和输出目录：
 
 ```bash
-./tjurm-test2 /路径/输入.avi /路径/输出.avi
+./tjurm-test2 /路径/输入.avi /路径/输出目录
 ```
 
 ## 算法流程
@@ -68,8 +79,10 @@ D:\AAAAAAATJU\TJU_Competition\ROBOMASTER\my-opencv-video-detector\videos\result.
    按 y 坐标排序，y 小的是上端点。
 4. **配对**：两根灯条必须基本平行、长度接近、上下端分别对齐、水平间距合理；
    用打分函数选出最像装甲板的一对。
-5. **绘制**：四个端点按“左上 → 右上 → 右下 → 左下”的顺序用 `cv::polylines` 连成闭合矩形，
-   写出 `result.avi`，并在有图形界面时用 `cv::imshow` 实时显示。
+5. **绘制**：四个端点按“左上 → 右上 → 右下 → 左下”的顺序用 `cv::polylines` 连成闭合矩形；
+6. **位姿**（选做）：用四个端点做 PnP 解算，把三维坐标轴投到装甲板中心，
+   并在有图形界面时用 `cv::imshow` 实时显示。
+   每一步的结果分别写进 `result.avi` / `result_axes.avi` / `result_pose.avi`。
 
 ## 参数在哪里调
 
@@ -98,23 +111,25 @@ D:\AAAAAAATJU\TJU_Competition\ROBOMASTER\my-opencv-video-detector\videos\result.
 
 ## 选做任务：PnP 位姿解算 + 三维坐标轴
 
-`pose/` 目录是选做部分的代码。它**独立编成一个可执行文件 `tjurm-pose`**，
-原来的 `main.cpp`、`detector.h`、`detector.cpp` 一行都没改；
-`CMakeLists.txt` 只加了 `calib3d` 组件和这个新目标，输出文件也是另起的
-`videos/result_pose.avi`，不会覆盖原来的 `result.avi`。
+位姿解算的代码放在 `pose/`，由 `main.cpp` 直接调用：每帧检测出装甲板后，
+先 `solveArmorPose()` 解出位姿，再 `drawPoseAxes()` 把坐标轴画到装甲板中心。
 
-运行方式和主程序一样（先 `cmake ..` 让新目标生效）：
+同一帧在三个副本上分别作图，所以一次运行输出三个视频：
 
-```bash
-cd build
-cmake -DOpenCV_DIR=/usr/local/opencv4.5.4/lib/cmake/opencv4 ..
-make -j$(nproc)
-./tjurm-pose
+```cpp
+cv::Mat frameBox  = frame.clone();   // 只画矩形框
+cv::Mat frameAxes = frame.clone();   // 只画坐标轴
+// frame 本身作为“矩形框 + 坐标轴”的版本
 ```
 
-生成的 `result_pose.avi` 里，绿色矩形不变，装甲板中心多一组 FLU 坐标轴：
-**x 红、y 绿、z 蓝**（和培训文档里的示意图配色一致），左上角写着
-距离、偏航角（yaw）和俯仰角（pitch）。
+- `videos/result.avi`：只画矩形框（第一步~第五步的结果）；
+- `videos/result_axes.avi`：只画坐标轴；
+- `videos/result_pose.avi`：矩形框 + 坐标轴。
+
+坐标轴是 FLU 轴序：**x 红**（装甲板正前方）、**y 绿**（装甲板左侧）、
+**z 蓝**（装甲板上方），和培训文档里的示意图配色一致；画面左上角还写着距离、
+偏航角（yaw）和俯仰角（pitch）。没解出位姿的帧（重投影误差太大，或者装甲板
+跑到相机后面）就只画矩形框。
 
 ![坐标轴效果](videos/pose_demo.png)
 
@@ -124,9 +139,9 @@ make -j$(nproc)
 | --- | --- |
 | `pose/pose.h` | 相机参数 `CameraParams`、位姿结果 `PoseResult`、函数声明 |
 | `pose/pose.cpp` | 内参、`cv::solvePnP` 解算、`cv::projectPoints` 画坐标轴 |
-| `pose/pose_main.cpp` | 读视频、逐帧调用检测 + 解算、写视频（相当于 `main.cpp` 的位姿版） |
+| `main.cpp` | 调用 `solveArmorPose()` / `drawPoseAxes()`，写出三个版本的视频 |
 
-检测部分直接复用 `findLightBars()` 和 `pairLightBars()`，没有改一行。
+检测部分直接复用原来的 `findLightBars()` 和 `pairLightBars()`，没有改动。
 
 ### 解算流程
 

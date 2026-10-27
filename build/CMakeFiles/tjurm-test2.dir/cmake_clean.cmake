@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/tjurm-test2.dir/main.cpp.o"
   "CMakeFiles/tjurm-test2.dir/main.cpp.o.d"
+  "CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o"
+  "CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o.d"
   "CMakeFiles/tjurm-test2.dir/src/detector.cpp.o"
   "CMakeFiles/tjurm-test2.dir/src/detector.cpp.o.d"
   "tjurm-test2"

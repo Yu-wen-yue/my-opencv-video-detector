@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -DPROJECT_ROOT=\"/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector\"
 
-CXX_INCLUDES = -I/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/include -isystem /usr/local/opencv4.5.4/include/opencv4
+CXX_INCLUDES = -I/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/include -I/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/pose -isystem /usr/local/opencv4.5.4/include/opencv4
 
 CXX_FLAGS = -std=gnu++17
 

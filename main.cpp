@@ -7,7 +7,12 @@
 #include <vector>
 
 #include "detector.h"
+#include "pose.h"
 
+// 同一个视频会处理出三个版本：
+//   videos/result.avi       只画装甲板的绿色矩形框（第一步~第五步的结果）
+//   videos/result_axes.avi  只画装甲板中心的三维坐标轴（选做任务：PnP 位姿）
+//   videos/result_pose.avi  矩形框 + 坐标轴
 int main(int argc, char** argv) {
     // CMake 会把项目根目录通过 PROJECT_ROOT 传进来。
     // 这样无论你在 build/ 里运行，还是在项目根目录运行，都能找到视频。
@@ -17,12 +22,16 @@ int main(int argc, char** argv) {
     const std::string projectRoot = ".";
 #endif
 
-    // 也支持手动指定输入/输出路径：
-    //   ./tjurm-test2 输入视频 输出视频
+    // 也支持手动指定输入视频和输出目录：
+    //   ./tjurm-test2 输入视频 输出目录
     const std::string videoPath =
         (argc > 1) ? argv[1] : projectRoot + "/videos/test.avi";
-    const std::string outputPath =
-        (argc > 2) ? argv[2] : projectRoot + "/videos/result.avi";
+    const std::string outputDir =
+        (argc > 2) ? argv[2] : projectRoot + "/videos";
+
+    const std::string boxPath  = outputDir + "/result.avi";
+    const std::string axesPath = outputDir + "/result_axes.avi";
+    const std::string posePath = outputDir + "/result_pose.avi";
 
     // ------------------------------------------------------------------
     // 1. 打开视频
@@ -55,17 +64,17 @@ int main(int argc, char** argv) {
               << "，总帧数：" << totalFrames << std::endl;
 
     // ------------------------------------------------------------------
-    // 2. 创建输出视频
+    // 2. 创建三个输出视频
     // ------------------------------------------------------------------
     // MJPG + .avi 是 OpenCV 自带支持的组合，不需要额外安装编码器。
-    cv::VideoWriter writer(
-        outputPath,
-        cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-        fps,
-        frame.size());
+    const int fourcc = cv::VideoWriter::fourcc('M', 'J', 'P', 'G');
+    cv::VideoWriter writerBox(boxPath, fourcc, fps, frame.size());
+    cv::VideoWriter writerAxes(axesPath, fourcc, fps, frame.size());
+    cv::VideoWriter writerPose(posePath, fourcc, fps, frame.size());
 
-    if (!writer.isOpened()) {
-        std::cerr << "无法创建输出视频：" << outputPath << std::endl;
+    if (!writerBox.isOpened() || !writerAxes.isOpened() || !writerPose.isOpened()) {
+        std::cerr << "无法创建输出视频，请检查目录是否存在、是否有写权限：" << outputDir
+                  << std::endl;
         return -1;
     }
 
@@ -86,12 +95,15 @@ int main(int argc, char** argv) {
         std::cout << "按 q 或 ESC 可以提前结束。" << std::endl;
     }
 
+    // 题目直接给出的相机内参和畸变系数（选做任务的位姿解算要用）。
+    const CameraParams cam = makeCameraParams();
+
     // ------------------------------------------------------------------
     // 3. 逐帧处理
     // ------------------------------------------------------------------
     int frameIndex = 0;
-    int detectedFrames = 0;
-    bool found = false;
+    int detectedFrames = 0; // 成功配对出装甲板的帧数
+    int posedFrames = 0;    // 成功解算出位姿的帧数
 
     while (!frame.empty()) {
         ++frameIndex;
@@ -100,16 +112,35 @@ int main(int argc, char** argv) {
         // 找灯条 + 配对成装甲板
         const std::vector<LightBar> bars = findLightBars(frame, mask);
         Armor armor;
-        found = pairLightBars(bars, armor);
+        const bool found = pairLightBars(bars, armor);
 
-        // 如果配对成功，就在画面上画绿色矩形
+        // 一帧要输出三个版本，所以都在副本上画，互不影响：
+        //   frameBox   -> 只画矩形框
+        //   frameAxes  -> 只画坐标轴
+        //   frame      -> 矩形框 + 坐标轴
+        cv::Mat frameBox  = frame.clone();
+        cv::Mat frameAxes = frame.clone();
+
+        PoseResult pose;
         if (found) {
-            drawArmor(frame, armor);
             ++detectedFrames;
+
+            // 先画坐标轴，再画矩形框：这样“ARMOR”几个字会盖在坐标轴上面，
+            // 装甲板比较小的时候才不会糊成一团。
+            if (solveArmorPose(armor, cam, pose)) {
+                ++posedFrames;
+                drawPoseAxes(frameAxes, pose, cam);
+                drawPoseAxes(frame, pose, cam);
+            }
+
+            drawArmor(frameBox, armor);
+            drawArmor(frame, armor);
         }
 
-        // 把处理后的这一帧写入输出视频
-        writer.write(frame);
+        // 三个版本分别写入各自的视频
+        writerBox.write(frameBox);
+        writerAxes.write(frameAxes);
+        writerPose.write(frame);
 
         // 实时显示处理结果和二值化掩码
         if (showWindow) {
@@ -124,8 +155,15 @@ int main(int argc, char** argv) {
 
         // 每 30 帧打印一次进度，方便观察运行状态
         if (frameIndex % 30 == 0) {
-            std::cout << "已处理 " << frameIndex << " 帧，灯条数：" << bars.size()
-                      << (found ? "，已框出装甲板" : "，未配对成功") << std::endl;
+            std::cout << "已处理 " << frameIndex << " 帧，灯条数：" << bars.size();
+            if (!found) {
+                std::cout << "，未配对成功";
+            } else if (!pose.valid) {
+                std::cout << "，已框出装甲板，但位姿解算失败";
+            } else {
+                std::cout << "，距离 " << cv::norm(pose.tvec) / 1000.0 << " m";
+            }
+            std::cout << std::endl;
         }
 
         // 读下一帧；读不到就退出循环
@@ -137,15 +175,20 @@ int main(int argc, char** argv) {
     // ------------------------------------------------------------------
     // 4. 收尾
     // ------------------------------------------------------------------
-    writer.release();
+    writerBox.release();
+    writerAxes.release();
+    writerPose.release();
     cap.release();
     if (showWindow) {
         cv::destroyAllWindows();
     }
 
-    std::cout << "处理完成：共 " << frameIndex << " 帧，成功识别 "
-              << detectedFrames << " 帧。" << std::endl;
-    std::cout << "输出视频：" << outputPath << std::endl;
+    std::cout << "处理完成：共 " << frameIndex << " 帧，成功识别装甲板 "
+              << detectedFrames << " 帧，成功解算位姿 " << posedFrames << " 帧。" << std::endl;
+    std::cout << "输出视频：" << std::endl;
+    std::cout << "  只画矩形框：      " << boxPath << std::endl;
+    std::cout << "  只画坐标轴：      " << axesPath << std::endl;
+    std::cout << "  矩形框 + 坐标轴：" << posePath << std::endl;
 
     return 0;
 }

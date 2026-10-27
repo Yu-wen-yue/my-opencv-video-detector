@@ -64,7 +64,6 @@ CMAKE_BINARY_DIR = /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-
 
 # The main recursive "all" target.
 all: CMakeFiles/tjurm-test2.dir/all
-all: CMakeFiles/tjurm-pose.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -73,7 +72,6 @@ preinstall:
 
 # The main recursive "clean" target.
 clean: CMakeFiles/tjurm-test2.dir/clean
-clean: CMakeFiles/tjurm-pose.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -83,12 +81,12 @@ clean: CMakeFiles/tjurm-pose.dir/clean
 CMakeFiles/tjurm-test2.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles --progress-num=5,6,7 "Built target tjurm-test2"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles --progress-num=1,2,3,4 "Built target tjurm-test2"
 .PHONY : CMakeFiles/tjurm-test2.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/tjurm-test2.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/tjurm-test2.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles 0
 .PHONY : CMakeFiles/tjurm-test2.dir/rule
@@ -101,32 +99,6 @@ tjurm-test2: CMakeFiles/tjurm-test2.dir/rule
 CMakeFiles/tjurm-test2.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/clean
 .PHONY : CMakeFiles/tjurm-test2.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/tjurm-pose.dir
-
-# All Build rule for target.
-CMakeFiles/tjurm-pose.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles --progress-num=1,2,3,4 "Built target tjurm-pose"
-.PHONY : CMakeFiles/tjurm-pose.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/tjurm-pose.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles 4
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/tjurm-pose.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles 0
-.PHONY : CMakeFiles/tjurm-pose.dir/rule
-
-# Convenience name for target.
-tjurm-pose: CMakeFiles/tjurm-pose.dir/rule
-.PHONY : tjurm-pose
-
-# clean rule for target.
-CMakeFiles/tjurm-pose.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/clean
-.PHONY : CMakeFiles/tjurm-pose.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

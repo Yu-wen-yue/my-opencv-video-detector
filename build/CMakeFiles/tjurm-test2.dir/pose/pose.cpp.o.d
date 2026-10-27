@@ -1,7 +1,7 @@
-CMakeFiles/tjurm-pose.dir/src/detector.cpp.o: \
- /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/src/detector.cpp \
+CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o: \
+ /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/pose/pose.cpp \
  /usr/include/stdc-predef.h \
- /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/include/detector.h \
+ /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/pose/pose.h \
  /usr/local/opencv4.5.4/include/opencv4/opencv2/opencv.hpp \
  /usr/local/opencv4.5.4/include/opencv4/opencv2/opencv_modules.hpp \
  /usr/local/opencv4.5.4/include/opencv4/opencv2/core.hpp \
@@ -354,4 +354,5 @@ CMakeFiles/tjurm-pose.dir/src/detector.cpp.o: \
  /usr/local/opencv4.5.4/include/opencv4/opencv2/stitching/detail/camera.hpp \
  /usr/local/opencv4.5.4/include/opencv4/opencv2/video.hpp \
  /usr/local/opencv4.5.4/include/opencv4/opencv2/video/tracking.hpp \
- /usr/local/opencv4.5.4/include/opencv4/opencv2/video/background_segm.hpp
+ /usr/local/opencv4.5.4/include/opencv4/opencv2/video/background_segm.hpp \
+ /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/include/detector.h
