@@ -110,8 +110,11 @@ tjurm-test2: CMakeFiles/tjurm-test2.dir/src/detector.cpp.o
 tjurm-test2: CMakeFiles/tjurm-test2.dir/build.make
 tjurm-test2: /usr/local/opencv4.5.4/lib/libopencv_highgui.so.4.5.4
 tjurm-test2: /usr/local/opencv4.5.4/lib/libopencv_videoio.so.4.5.4
+tjurm-test2: /usr/local/opencv4.5.4/lib/libopencv_calib3d.so.4.5.4
 tjurm-test2: /usr/local/opencv4.5.4/lib/libopencv_imgcodecs.so.4.5.4
+tjurm-test2: /usr/local/opencv4.5.4/lib/libopencv_features2d.so.4.5.4
 tjurm-test2: /usr/local/opencv4.5.4/lib/libopencv_imgproc.so.4.5.4
+tjurm-test2: /usr/local/opencv4.5.4/lib/libopencv_flann.so.4.5.4
 tjurm-test2: /usr/local/opencv4.5.4/lib/libopencv_core.so.4.5.4
 tjurm-test2: CMakeFiles/tjurm-test2.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable tjurm-test2"

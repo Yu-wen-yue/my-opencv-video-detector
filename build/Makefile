@@ -129,6 +129,19 @@ tjurm-test2/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/build
 .PHONY : tjurm-test2/fast
 
+#=============================================================================
+# Target rules for targets named tjurm-pose
+
+# Build rule for target.
+tjurm-pose: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tjurm-pose
+.PHONY : tjurm-pose
+
+# fast build rule for target.
+tjurm-pose/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/build
+.PHONY : tjurm-pose/fast
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -153,12 +166,61 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+pose/pose.o: pose/pose.cpp.o
+.PHONY : pose/pose.o
+
+# target to build an object file
+pose/pose.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/pose/pose.cpp.o
+.PHONY : pose/pose.cpp.o
+
+pose/pose.i: pose/pose.cpp.i
+.PHONY : pose/pose.i
+
+# target to preprocess a source file
+pose/pose.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/pose/pose.cpp.i
+.PHONY : pose/pose.cpp.i
+
+pose/pose.s: pose/pose.cpp.s
+.PHONY : pose/pose.s
+
+# target to generate assembly for a file
+pose/pose.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/pose/pose.cpp.s
+.PHONY : pose/pose.cpp.s
+
+pose/pose_main.o: pose/pose_main.cpp.o
+.PHONY : pose/pose_main.o
+
+# target to build an object file
+pose/pose_main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/pose/pose_main.cpp.o
+.PHONY : pose/pose_main.cpp.o
+
+pose/pose_main.i: pose/pose_main.cpp.i
+.PHONY : pose/pose_main.i
+
+# target to preprocess a source file
+pose/pose_main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/pose/pose_main.cpp.i
+.PHONY : pose/pose_main.cpp.i
+
+pose/pose_main.s: pose/pose_main.cpp.s
+.PHONY : pose/pose_main.s
+
+# target to generate assembly for a file
+pose/pose_main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/pose/pose_main.cpp.s
+.PHONY : pose/pose_main.cpp.s
+
 src/detector.o: src/detector.cpp.o
 .PHONY : src/detector.o
 
 # target to build an object file
 src/detector.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/src/detector.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/src/detector.cpp.o
 .PHONY : src/detector.cpp.o
 
 src/detector.i: src/detector.cpp.i
@@ -167,6 +229,7 @@ src/detector.i: src/detector.cpp.i
 # target to preprocess a source file
 src/detector.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/src/detector.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/src/detector.cpp.i
 .PHONY : src/detector.cpp.i
 
 src/detector.s: src/detector.cpp.s
@@ -175,6 +238,7 @@ src/detector.s: src/detector.cpp.s
 # target to generate assembly for a file
 src/detector.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/src/detector.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-pose.dir/build.make CMakeFiles/tjurm-pose.dir/src/detector.cpp.s
 .PHONY : src/detector.cpp.s
 
 # Help Target
@@ -185,10 +249,17 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... tjurm-pose"
 	@echo "... tjurm-test2"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... pose/pose.o"
+	@echo "... pose/pose.i"
+	@echo "... pose/pose.s"
+	@echo "... pose/pose_main.o"
+	@echo "... pose/pose_main.i"
+	@echo "... pose/pose_main.s"
 	@echo "... src/detector.o"
 	@echo "... src/detector.i"
 	@echo "... src/detector.s"

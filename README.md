@@ -22,9 +22,14 @@
 │   └── detector.h          # LightBar / Armor 结构体和函数声明
 ├── src/
 │   └── detector.cpp        # 灯条识别核心算法（二值化、轮廓、配对）
+├── pose/                   # 选做任务：PnP 位姿解算（独立可执行文件 tjurm-pose）
+│   ├── pose.h              # 相机参数、位姿结果结构体、函数声明
+│   ├── pose.cpp            # solvePnP 解算 + projectPoints 画坐标轴
+│   └── pose_main.cpp       # 读视频、逐帧解算、写 result_pose.avi
 ├── videos/
 │   ├── test.avi            # 输入视频
-│   └── result.avi          # 程序生成的输出视频
+│   ├── result.avi          # 灯条识别程序的输出视频
+│   └── result_pose.avi     # 位姿解算程序的输出视频
 └── .vscode/
     └── c_cpp_properties.json  # 让 VS Code 认识 OpenCV 头文件，去掉红色波浪线
 ```
@@ -88,6 +93,115 @@ D:\AAAAAAATJU\TJU_Competition\ROBOMASTER\my-opencv-video-detector\videos\result.
 | `cv::findContours` | `detector.cpp` 找灯条轮廓          |
 | `cv::minAreaRect`  | `detector.cpp` 求灯条旋转矩形      |
 | `cv::imshow`       | `main.cpp` 显示 Result / Mask 窗口 |
+| `cv::solvePnP`（选做）     | `pose/pose.cpp` 解算装甲板位姿 |
+| `cv::projectPoints`（选做） | `pose/pose.cpp` 画三维坐标轴 |
+
+## 选做任务：PnP 位姿解算 + 三维坐标轴
+
+`pose/` 目录是选做部分的代码。它**独立编成一个可执行文件 `tjurm-pose`**，
+原来的 `main.cpp`、`detector.h`、`detector.cpp` 一行都没改；
+`CMakeLists.txt` 只加了 `calib3d` 组件和这个新目标，输出文件也是另起的
+`videos/result_pose.avi`，不会覆盖原来的 `result.avi`。
+
+运行方式和主程序一样（先 `cmake ..` 让新目标生效）：
+
+```bash
+cd build
+cmake -DOpenCV_DIR=/usr/local/opencv4.5.4/lib/cmake/opencv4 ..
+make -j$(nproc)
+./tjurm-pose
+```
+
+生成的 `result_pose.avi` 里，绿色矩形不变，装甲板中心多一组 FLU 坐标轴：
+**x 红、y 绿、z 蓝**（和培训文档里的示意图配色一致），左上角写着
+距离、偏航角（yaw）和俯仰角（pitch）。
+
+![坐标轴效果](videos/pose_demo.png)
+
+### 代码分工
+
+| 文件 | 作用 |
+| --- | --- |
+| `pose/pose.h` | 相机参数 `CameraParams`、位姿结果 `PoseResult`、函数声明 |
+| `pose/pose.cpp` | 内参、`cv::solvePnP` 解算、`cv::projectPoints` 画坐标轴 |
+| `pose/pose_main.cpp` | 读视频、逐帧调用检测 + 解算、写视频（相当于 `main.cpp` 的位姿版） |
+
+检测部分直接复用 `findLightBars()` 和 `pairLightBars()`，没有改一行。
+
+### 解算流程
+
+1. `pairLightBars()` 给出四个端点（左上、右上、右下、左下）；
+2. `cv::undistortPoints()` 先把四个端点去畸变，换成“理想针孔相机”下的像素坐标
+   —— `solvePnP` 内部对畸变的处理并不完整，先把畸变去掉再解算是最稳的做法；
+3. `cv::solvePnP()` 用 `SOLVEPNP_IPPE` 方法解算（四个点共面，属于平面 PnP）；
+   万一 IPPE 在退化情况下失败，会退回 `SOLVEPNP_ITERATIVE`；
+4. 解出 `rvec`（旋转）和 `tvec`（平移，单位 mm）后，用 `cv::projectPoints()`
+   把装甲板坐标系的原点和三条轴的终点投回图像（这次带上畸变系数，画的位置才和画面一致），
+   再 `cv::arrowedLine` 画箭头；
+5. 用四个端点的**重投影误差**检查这次解算靠不靠谱：把模型点按解出来的位姿投回去，
+   和实际端点比，平均偏差超过 5 像素就认为这一帧解错了，不画坐标轴。
+
+### 坐标系和模型点（这里最容易写错）
+
+装甲板坐标系用任务要求的 FLU，原点在装甲板中心：
+
+- **x**：装甲板正前方（也就是正对镜头那一面朝外的方向）
+- **y**：装甲板左侧
+- **z**：装甲板上方
+
+相机坐标系还是 OpenCV 的惯例：x 向右、y 向下、z 沿光轴向前。
+
+四个模型点必须和 `Armor::corners` 的顺序（图像里的左上、右上、右下、左下）一一对应：
+
+```cpp
+corners[0] 左上 -> (0, -w/2, +h/2)
+corners[1] 右上 -> (0, +w/2, +h/2)
+corners[2] 右下 -> (0, +w/2, -h/2)
+corners[3] 左下 -> (0, -w/2, -h/2)   // w = 灯条中心距，h = 灯条长度
+```
+
+注意 y 的符号：装甲板正面朝着我们，就像两个人面对面，**它的左手边出现在画面右边**，
+所以“图像左上”那个点的 y 是负的。画出来的绿色 y 轴指向画面右侧，
+和培训文档里的示意图一致；如果符号写反，解出来的位姿会差 180°（z 轴会朝下）。
+
+一个自查的办法：解完之后看画出来的坐标轴 —— z 一定朝上、y 朝装甲板左侧（画面右）、
+x 因为指向镜头，在装甲板靠近画面中心时会缩得很短，这都是对的。
+
+### 物理尺寸（决定距离的那两个数）
+
+`pose/pose.cpp` 最上面：
+
+```cpp
+constexpr float kArmorWidth     = 135.0f; // 两根灯条中心线之间的距离，单位 mm
+constexpr float kLightBarLength = 55.0f;  // 灯条长度，单位 mm
+constexpr float kAxisLength     = 45.0f;  // 画出来每条轴的长度，单位 mm
+```
+
+PnP 只能解出“相对于模型尺寸”的距离：这两个数如果和真实装甲板不一致，
+算出来的距离会按同样比例缩小/放大，**姿态角不受影响**。
+灯条中心距 110~135mm 在不同开源代码里都有人用，这里取 135mm、灯条 55mm，
+和 `test.avi` 里量到的像素宽高比（≈2.4）也是对得上的；
+换成大装甲板或别的板子时，改这两个数就行。
+
+### 相机参数
+
+内参和畸变直接用了题目给的值（`makeCameraParams()`）：
+
+```
+fx=928.13  fy=930.14  cx=377.57  cy=283.89
+k1=-0.2544 k2=0.5694 p1=0.00365 p2=-0.00109 k3=-1.3385
+```
+
+注意主点是 (377.6, 283.9)，比 720×540 画面的中心 (360, 270) 偏了十几个像素，
+说明这组参数大概不是按 720×540 标定的（可能原图的尺寸/裁剪不一样）。
+这里按题目原样使用，没有做缩放，所以解出来的距离会有一点系统误差，
+但坐标轴的方向基本不受影响。
+
+### 实测结果（`videos/test.avi`）
+
+- 101 帧全部配对成功，也全部解算成功；
+- 四个端点的平均重投影误差约 **0.1 像素**（说明模型和检测到的端点吻合得很好）；
+- 距离从 2.6 m（远处的装甲板）到 1.73 m（近处的“4”号装甲板）。
 
 ## 常见问题
 
