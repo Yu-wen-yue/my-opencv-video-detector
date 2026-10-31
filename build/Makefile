@@ -153,30 +153,6 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/main.cpp.s
 .PHONY : main.cpp.s
 
-pose/pose.o: pose/pose.cpp.o
-.PHONY : pose/pose.o
-
-# target to build an object file
-pose/pose.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o
-.PHONY : pose/pose.cpp.o
-
-pose/pose.i: pose/pose.cpp.i
-.PHONY : pose/pose.i
-
-# target to preprocess a source file
-pose/pose.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/pose/pose.cpp.i
-.PHONY : pose/pose.cpp.i
-
-pose/pose.s: pose/pose.cpp.s
-.PHONY : pose/pose.s
-
-# target to generate assembly for a file
-pose/pose.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/pose/pose.cpp.s
-.PHONY : pose/pose.cpp.s
-
 src/detector.o: src/detector.cpp.o
 .PHONY : src/detector.o
 
@@ -201,6 +177,30 @@ src/detector.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/src/detector.cpp.s
 .PHONY : src/detector.cpp.s
 
+src/pose.o: src/pose.cpp.o
+.PHONY : src/pose.o
+
+# target to build an object file
+src/pose.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/src/pose.cpp.o
+.PHONY : src/pose.cpp.o
+
+src/pose.i: src/pose.cpp.i
+.PHONY : src/pose.i
+
+# target to preprocess a source file
+src/pose.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/src/pose.cpp.i
+.PHONY : src/pose.cpp.i
+
+src/pose.s: src/pose.cpp.s
+.PHONY : src/pose.s
+
+# target to generate assembly for a file
+src/pose.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tjurm-test2.dir/build.make CMakeFiles/tjurm-test2.dir/src/pose.cpp.s
+.PHONY : src/pose.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -213,12 +213,12 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
-	@echo "... pose/pose.o"
-	@echo "... pose/pose.i"
-	@echo "... pose/pose.s"
 	@echo "... src/detector.o"
 	@echo "... src/detector.i"
 	@echo "... src/detector.s"
+	@echo "... src/pose.o"
+	@echo "... src/pose.i"
+	@echo "... src/pose.s"
 .PHONY : help
 
 

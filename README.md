@@ -27,18 +27,16 @@
 ├── CMakeLists.txt          # CMake 构建脚本
 ├── main.cpp                # 读视频、逐帧检测 + 位姿解算、写三个输出视频、显示窗口
 ├── include/
-│   └── detector.h          # LightBar / Armor 结构体和函数声明
+│   ├── detector.h          # LightBar / Armor 结构体和函数声明
+│   └── pose.h              # 相机参数、位姿结果结构体、AngleFilter、函数声明
 ├── src/
-│   └── detector.cpp        # 灯条识别核心算法（二值化、轮廓、配对）
-├── pose/                   # 选做任务：PnP 位姿解算 + 坐标轴，由 main.cpp 调用
-│   ├── pose.h              # 相机参数、位姿结果结构体、函数声明
+│   ├── detector.cpp        # 灯条识别核心算法（二值化、轮廓、配对）
 │   └── pose.cpp            # solvePnP 解算 + projectPoints 画坐标轴
 ├── videos/
 │   ├── test.avi            # 输入视频
 │   ├── result.avi          # 输出：只画矩形框
 │   ├── result_axes.avi     # 输出：只画坐标轴
 │   ├── result_pose.avi     # 输出：矩形框 + 坐标轴
-│   └── pose_demo.png       # 坐标轴效果截图
 └── .vscode/
     └── c_cpp_properties.json  # 让 VS Code 认识 OpenCV 头文件，去掉红色波浪线
 ```
@@ -106,12 +104,12 @@ D:\AAAAAAATJU\TJU_Competition\ROBOMASTER\my-opencv-video-detector\videos\result_
 | `cv::findContours` | `detector.cpp` 找灯条轮廓          |
 | `cv::minAreaRect`  | `detector.cpp` 求灯条旋转矩形      |
 | `cv::imshow`       | `main.cpp` 显示 Result / Mask 窗口 |
-| `cv::solvePnP`（选做）     | `pose/pose.cpp` 解算装甲板位姿 |
-| `cv::projectPoints`（选做） | `pose/pose.cpp` 画三维坐标轴 |
+| `cv::solvePnP`（选做）     | `src/pose.cpp` 解算装甲板位姿 |
+| `cv::projectPoints`（选做） | `src/pose.cpp` 画三维坐标轴 |
 
 ## 选做任务：PnP 位姿解算 + 三维坐标轴
 
-位姿解算的代码放在 `pose/`，由 `main.cpp` 直接调用：每帧检测出装甲板后，
+位姿解算的代码放在 `include/pose.h` + `src/pose.cpp`，由 `main.cpp` 直接调用：每帧检测出装甲板后，
 先 `solveArmorPose()` 解出位姿，再 `drawPoseAxes()` 把坐标轴画到装甲板中心。
 
 同一帧在三个副本上分别作图，所以一次运行输出三个视频：
@@ -131,17 +129,37 @@ cv::Mat frameAxes = frame.clone();   // 只画坐标轴
 偏航角（yaw）和俯仰角（pitch）。没解出位姿的帧（重投影误差太大，或者装甲板
 跑到相机后面）就只画矩形框。
 
-![坐标轴效果](videos/pose_demo.png)
-
 ### 代码分工
 
 | 文件 | 作用 |
 | --- | --- |
-| `pose/pose.h` | 相机参数 `CameraParams`、位姿结果 `PoseResult`、函数声明 |
-| `pose/pose.cpp` | 内参、`cv::solvePnP` 解算、`cv::projectPoints` 画坐标轴 |
+| `include/pose.h` | 相机参数 `CameraParams`、位姿结果 `PoseResult`、`AngleFilter`、函数声明 |
+| `src/pose.cpp` | 内参、`cv::solvePnP` 解算、`cv::projectPoints` 画坐标轴、角度与滤波 |
 | `main.cpp` | 调用 `solveArmorPose()` / `drawPoseAxes()`，写出三个版本的视频 |
 
 检测部分直接复用原来的 `findLightBars()` 和 `pairLightBars()`，没有改动。
+
+### 角度标签：相对视线，并且做了中值滤波
+
+左上角的 `yaw` / `pitch` 是**相对视线（LOS, line of sight）**的偏角：0° 表示装甲板
+法向正对着相机。先取 `los = -tvec / |tvec|`（相机指向装甲板的方向），再在垂直于
+`los` 的平面里取两个基向量 `ex = (0,-1,0) × los`、`ey = los × ex`，最后
+`yaw = atan2(n·ex, n·los)`、`pitch = atan2(n·ey, n·los)`，其中 `n` 是装甲板法向。
+这样装甲板出现在画面偏左/偏右时读数不受影响 —— 如果直接相对相机光轴算，
+板子在画面边缘、明明正对相机也会被读出十几度。
+
+但这两个角在 1.7 m 的距离上**天生不稳**：板子只有 70×30 像素左右，转 10° 时远边
+只比近边短 1.4%（约 0.4 像素），和角点本身的 0.5 像素量化同一个量级，所以解出的
+角度会来回跳。显示用的值因此做了 **5 帧中值滤波**（`AngleFilter`，`include/pose.h`）：
+连续 5 帧取中位数，单个坏帧不会直接跳到读数上，实测逐帧抖动（相邻帧差的绝对值）
+
+| | 均值 | p95 | 最大 |
+| --- | --- | --- | --- |
+| yaw 原始 → 滤波 | 4.2° → 1.7° | 11.6° → 10.7° | 33.9° → 26.1° |
+| pitch 原始 → 滤波 | 6.7° → 2.3° | 27.1° → 17.4° | 42.5° → 23.2° |
+
+滤波只作用在**文字读数**上，`cv::projectPoints` 画坐标轴用的仍是每帧解出的真实位姿；
+连续几帧没有装甲板时 `AngleFilter` 会自动清空，不会带着旧数据。
 
 ### 解算流程
 
@@ -184,7 +202,7 @@ x 因为指向镜头，在装甲板靠近画面中心时会缩得很短，这都
 
 ### 物理尺寸（决定距离的那两个数）
 
-`pose/pose.cpp` 最上面：
+`src/pose.cpp` 最上面：
 
 ```cpp
 constexpr float kArmorWidth     = 135.0f; // 两根灯条中心线之间的距离，单位 mm

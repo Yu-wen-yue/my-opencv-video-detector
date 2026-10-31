@@ -97,32 +97,32 @@ CMakeFiles/tjurm-test2.dir/src/detector.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/tjurm-test2.dir/src/detector.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/src/detector.cpp -o CMakeFiles/tjurm-test2.dir/src/detector.cpp.s
 
-CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o: CMakeFiles/tjurm-test2.dir/flags.make
-CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o: ../pose/pose.cpp
-CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o: CMakeFiles/tjurm-test2.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o -MF CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o.d -o CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o -c /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/pose/pose.cpp
+CMakeFiles/tjurm-test2.dir/src/pose.cpp.o: CMakeFiles/tjurm-test2.dir/flags.make
+CMakeFiles/tjurm-test2.dir/src/pose.cpp.o: ../src/pose.cpp
+CMakeFiles/tjurm-test2.dir/src/pose.cpp.o: CMakeFiles/tjurm-test2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/tjurm-test2.dir/src/pose.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tjurm-test2.dir/src/pose.cpp.o -MF CMakeFiles/tjurm-test2.dir/src/pose.cpp.o.d -o CMakeFiles/tjurm-test2.dir/src/pose.cpp.o -c /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/src/pose.cpp
 
-CMakeFiles/tjurm-test2.dir/pose/pose.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/tjurm-test2.dir/pose/pose.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/pose/pose.cpp > CMakeFiles/tjurm-test2.dir/pose/pose.cpp.i
+CMakeFiles/tjurm-test2.dir/src/pose.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/tjurm-test2.dir/src/pose.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/src/pose.cpp > CMakeFiles/tjurm-test2.dir/src/pose.cpp.i
 
-CMakeFiles/tjurm-test2.dir/pose/pose.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/tjurm-test2.dir/pose/pose.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/pose/pose.cpp -o CMakeFiles/tjurm-test2.dir/pose/pose.cpp.s
+CMakeFiles/tjurm-test2.dir/src/pose.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/tjurm-test2.dir/src/pose.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/src/pose.cpp -o CMakeFiles/tjurm-test2.dir/src/pose.cpp.s
 
 # Object files for target tjurm-test2
 tjurm__test2_OBJECTS = \
 "CMakeFiles/tjurm-test2.dir/main.cpp.o" \
 "CMakeFiles/tjurm-test2.dir/src/detector.cpp.o" \
-"CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o"
+"CMakeFiles/tjurm-test2.dir/src/pose.cpp.o"
 
 # External object files for target tjurm-test2
 tjurm__test2_EXTERNAL_OBJECTS =
 
 tjurm-test2: CMakeFiles/tjurm-test2.dir/main.cpp.o
 tjurm-test2: CMakeFiles/tjurm-test2.dir/src/detector.cpp.o
-tjurm-test2: CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o
+tjurm-test2: CMakeFiles/tjurm-test2.dir/src/pose.cpp.o
 tjurm-test2: CMakeFiles/tjurm-test2.dir/build.make
 tjurm-test2: /usr/local/opencv4.5.4/lib/libopencv_highgui.so.4.5.4
 tjurm-test2: /usr/local/opencv4.5.4/lib/libopencv_videoio.so.4.5.4

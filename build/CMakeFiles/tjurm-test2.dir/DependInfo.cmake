@@ -9,8 +9,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/main.cpp" "CMakeFiles/tjurm-test2.dir/main.cpp.o" "gcc" "CMakeFiles/tjurm-test2.dir/main.cpp.o.d"
-  "/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/pose/pose.cpp" "CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o" "gcc" "CMakeFiles/tjurm-test2.dir/pose/pose.cpp.o.d"
   "/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/src/detector.cpp" "CMakeFiles/tjurm-test2.dir/src/detector.cpp.o" "gcc" "CMakeFiles/tjurm-test2.dir/src/detector.cpp.o.d"
+  "/mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/src/pose.cpp" "CMakeFiles/tjurm-test2.dir/src/pose.cpp.o" "gcc" "CMakeFiles/tjurm-test2.dir/src/pose.cpp.o.d"
   )
 
 # Targets to which this target links.

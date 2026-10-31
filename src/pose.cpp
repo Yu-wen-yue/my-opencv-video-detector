@@ -49,19 +49,42 @@ std::vector<cv::Point3f> armorModelPoints() {
     };
 }
 
-// 三个角度都是从旋转矩阵 R 里拆出来的，0 度表示装甲板正对相机、且没有倾斜。
-//   n  = R 的第一列 = 装甲板 x 轴（正面法向）在相机坐标系下的方向
-//   up = R 的第三列 = 装甲板 z 轴（板上方）在相机坐标系下的方向
-void computeAngles(const cv::Mat& R, PoseResult& pose) {
+// 三个角度都从旋转矩阵 R 里拆出来，0 度表示装甲板正对相机。
+//   n    = R 的第一列 = 装甲板 x 轴（正面法向）在相机坐标系下的方向
+//   up   = R 的第三列 = 装甲板 z 轴（板上方）在相机坐标系下的方向
+//
+// 这里的基准是**视线**（从装甲板中心指向相机的方向），不是相机光轴。
+// 区别在哪：板子偏在画面左侧、但正对相机时，它的法向指向相机而不平行于光轴，
+// 拿光轴当基准就会读出一个“看着像板子歪了、其实只是位置偏了”的角。
+// 拿视线当基准，正对相机时三个角都是 0，读数才对应“板子本身转了多少”。
+void computeAngles(const cv::Mat& R, const cv::Vec3d& tvec, PoseResult& pose) {
     const cv::Vec3d n(R.at<double>(0, 0), R.at<double>(1, 0), R.at<double>(2, 0));
-    const cv::Vec3d up(R.at<double>(0, 2), R.at<double>(1, 2), R.at<double>(2, 2));
+    const cv::Vec3d plateUp(R.at<double>(0, 2), R.at<double>(1, 2), R.at<double>(2, 2));
+
+    // 视线方向：tvec 是“相机 -> 装甲板”，取反才是“装甲板 -> 相机”。
+    const double dist = std::max(1e-6, cv::norm(tvec));
+    const cv::Vec3d los(-tvec[0] / dist, -tvec[1] / dist, -tvec[2] / dist);
+
+    // 以视线为准建一个局部坐标系：ex 朝画面右、ey 朝画面上。
+    // 相机坐标系里“上”是 -y。
+    cv::Vec3d ex = cv::Vec3d(0.0, -1.0, 0.0).cross(los);
+    if (cv::norm(ex) < 1e-6) {
+        // 板子正好在相机正上方/正下方时视线和“上”平行，退化，换一根轴。
+        ex = cv::Vec3d(1.0, 0.0, 0.0).cross(los);
+    }
+    ex /= cv::norm(ex);
+    const cv::Vec3d ey = los.cross(ex); // 单位向量
+
+    // 把法向 n 投到这个坐标系里：a 朝右、b 朝上、c 朝相机。
+    const double a = n.dot(ex);
+    const double b = n.dot(ey);
+    const double c = n.dot(los);
 
     const double kRad2Deg = 180.0 / CV_PI;
-    // 正对相机时 n = (0, 0, -1)，所以用 -n[2] 做“正前方”的参考。
-    pose.yaw   = std::atan2(n[0], -n[2]) * kRad2Deg;
-    pose.pitch = std::asin(std::max(-1.0, std::min(1.0, -n[1]))) * kRad2Deg;
+    pose.yaw   = std::atan2(a, c) * kRad2Deg; // 朝画面右偏为正
+    pose.pitch = std::atan2(b, c) * kRad2Deg; // 朝画面上偏为正
     // 板上方在画面里应该是竖直向上的（-y），偏多少就是画面内的倾斜角。
-    pose.roll = std::atan2(up[0], -up[1]) * kRad2Deg;
+    pose.roll = std::atan2(plateUp[0], -plateUp[1]) * kRad2Deg;
 }
 
 // 画一条带箭头的坐标轴，并在箭头上写字母。
@@ -134,7 +157,7 @@ bool solveArmorPose(const Armor& armor, const CameraParams& cam, PoseResult& pos
 
     cv::Mat R;
     cv::Rodrigues(rvec, R);
-    computeAngles(R, pose);
+    computeAngles(R, tvec, pose);
 
     pose.rvec = rvec;
     pose.tvec = tvec;
@@ -167,10 +190,36 @@ void drawPoseAxes(cv::Mat& frame, const PoseResult& pose, const CameraParams& ca
     drawAxis(frame, origin, projected[3], cv::Scalar(255, 0, 0), "Z");
     cv::circle(frame, origin, 3, cv::Scalar(255, 255, 255), cv::FILLED);
 
-    // 左上角写一行位姿摘要：距离 + 偏航角 + 俯仰角。
+    // 左上角写一行位姿摘要：距离 + 相对视线的偏航/俯仰角。
+    // “vs LOS”（line of sight，视线）表示 0 度 = 装甲板正对相机。
+    /*
     char text[96];
-    std::snprintf(text, sizeof(text), "d=%.2fm yaw=%+.1f pitch=%+.1f", cv::norm(pose.tvec) / 1000.0,
-                  pose.yaw, pose.pitch);
+    std::snprintf(text, sizeof(text), "d=%.2fm yaw=%+.1f pitch=%+.1f (vs LOS)",
+                  cv::norm(pose.tvec) / 1000.0, pose.yaw, pose.pitch);
     cv::putText(frame, text, cv::Point(10, 24), cv::FONT_HERSHEY_SIMPLEX, 0.55,
                 cv::Scalar(0, 255, 255), 1, cv::LINE_AA);
+    */
+}
+
+// ---------------------------------------------------------------------------
+// AngleFilter：最近 kWindow 帧的中值滤波。
+// ---------------------------------------------------------------------------
+double AngleFilter::median(std::array<double, kWindow> values, int count) {
+    // 只排序已经写进去的 count 个值，剩下的默认 0 不参与。
+    std::sort(values.begin(), values.begin() + count);
+    return values[count / 2];
+}
+
+void AngleFilter::apply(PoseResult& pose) {
+    yaw_[next_] = pose.yaw;
+    pitch_[next_] = pose.pitch;
+    roll_[next_] = pose.roll;
+    next_ = (next_ + 1) % kWindow;
+    if (count_ < kWindow) {
+        ++count_;
+    }
+
+    pose.yaw = median(yaw_, count_);
+    pose.pitch = median(pitch_, count_);
+    pose.roll = median(roll_, count_);
 }

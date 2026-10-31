@@ -355,4 +355,5 @@ CMakeFiles/tjurm-test2.dir/main.cpp.o: \
  /usr/local/opencv4.5.4/include/opencv4/opencv2/video/tracking.hpp \
  /usr/local/opencv4.5.4/include/opencv4/opencv2/video/background_segm.hpp \
  /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/include/detector.h \
- /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/pose/pose.h
+ /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/include/pose.h \
+ /mnt/d/AAAAAAATJU/TJU_Competition/ROBOMASTER/my-opencv-video-detector/include/detector.h

@@ -98,6 +98,11 @@ int main(int argc, char** argv) {
     // 题目直接给出的相机内参和畸变系数（选做任务的位姿解算要用）。
     const CameraParams cam = makeCameraParams();
 
+    // 角度读数的中值滤波（原因见 pose.h 里 AngleFilter 的注释）：
+    // 板子小、又基本正对相机时，yaw/pitch 逐帧会跳几度到几十度，直接显示没法看。
+    // 它只平滑显示的数字，坐标轴仍然用当帧的解算结果画。
+    AngleFilter angleFilter;
+
     // ------------------------------------------------------------------
     // 3. 逐帧处理
     // ------------------------------------------------------------------
@@ -129,12 +134,16 @@ int main(int argc, char** argv) {
             // 装甲板比较小的时候才不会糊成一团。
             if (solveArmorPose(armor, cam, pose)) {
                 ++posedFrames;
+                angleFilter.apply(pose); // 平滑 yaw / pitch / roll
                 drawPoseAxes(frameAxes, pose, cam);
                 drawPoseAxes(frame, pose, cam);
             }
 
             drawArmor(frameBox, armor);
             drawArmor(frame, armor);
+        } else {
+            // 这一帧没找到装甲板：清掉滤波历史，免得下次出现时和旧数据混在一起。
+            angleFilter.reset();
         }
 
         // 三个版本分别写入各自的视频

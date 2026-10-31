@@ -9,12 +9,10 @@ find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui videoio calib3d)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(include)
+# src/ 下的 detector.cpp、pose.cpp 都会被这里扫到，不用再单独列
 file(GLOB SOURCES "src/*.cpp")
 
-# pose/pose.cpp 是选做任务的位姿解算和坐标轴绘制，由 main.cpp 调用
-add_executable(tjurm-test2 main.cpp ${SOURCES} pose/pose.cpp)
-
-target_include_directories(tjurm-test2 PRIVATE pose)
+add_executable(tjurm-test2 main.cpp ${SOURCES})
 
 target_link_libraries(tjurm-test2 PRIVATE ${OpenCV_LIBRARIES})
 
